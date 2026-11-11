@@ -4,7 +4,7 @@ import json
 import os
 import urllib.parse
 
-# Memastikan direktori kerja server selalu sesuai dengan lokasi file server.py
+# Memastikan direktori kerja server selalu sinkron dengan lokasi script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 PORT = int(os.environ.get('PORT', 8080))
@@ -16,10 +16,28 @@ DEFAULT_DB = {
         {"id": 1, "category_id": 1, "name": "Nasi Goreng Telur", "price": 12000, "stock": 15, "active": True, "rec": True, "description": "Nasi goreng gurih dengan telur", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=300&q=80"},
         {"id": 2, "category_id": 1, "name": "Nasi Ayam Geprek", "price": 15000, "stock": 12, "active": True, "rec": True, "description": "Ayam crispy dengan sambal geprek pedas", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1626509492160-e4fe9e9f3b89?auto=format&fit=crop&w=300&q=80"},
         {"id": 3, "category_id": 1, "name": "Nasi Telur Kecap", "price": 10000, "stock": 20, "active": True, "rec": False, "description": "Nasi putih dengan telur ceplok kecap", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"},
+        {"id": 4, "category_id": 1, "name": "Nasi Ayam Suwir", "price": 13000, "stock": 15, "active": True, "rec": False, "description": "Nasi dengan suwiran ayam berbumbu", "cat": "Makanan Berat", "image": "🍽️"},
+        {"id": 5, "category_id": 1, "name": "Nasi Uduk", "price": 10000, "stock": 25, "active": True, "rec": False, "description": "Nasi uduk harum khas lengkap", "cat": "Makanan Berat", "image": "🍽️"},
         {"id": 6, "category_id": 2, "name": "Bakwan", "price": 2000, "stock": 30, "active": True, "rec": False, "description": "Bakwan sayur renyah hangat", "cat": "Makanan Ringan", "image": "🥠"},
         {"id": 7, "category_id": 2, "name": "Risoles", "price": 3000, "stock": 25, "active": True, "rec": False, "description": "Risoles isi sayur/ragout", "cat": "Makanan Ringan", "image": "🥟"},
+        {"id": 8, "category_id": 2, "name": "Tahu Isi", "price": 2000, "stock": 30, "active": True, "rec": False, "description": "Tahu goreng isi sayuran pedas", "cat": "Makanan Ringan", "image": "🧆"},
+        {"id": 9, "category_id": 2, "name": "Cireng", "price": 5000, "stock": 20, "active": True, "rec": False, "description": "Cireng kenyal bumbu rujak", "cat": "Makanan Ringan", "image": "🍘"},
+        {"id": 10, "category_id": 2, "name": "Sosis Bakar", "price": 5000, "stock": 15, "active": True, "rec": False, "description": "Sosis panggang saus spesial", "cat": "Makanan Ringan", "image": "🌭"},
+        {"id": 11, "category_id": 2, "name": "Kentang Goreng", "price": 7000, "stock": 15, "active": True, "rec": False, "description": "French fries gurih renyah", "cat": "Makanan Ringan", "image": "🍟"},
         {"id": 12, "category_id": 3, "name": "Mie Ayam", "price": 12000, "stock": 15, "active": True, "rec": True, "description": "Mie kenyal topping ayam gurih", "cat": "Mie dan Instan", "image": "🍜"},
-        {"id": 16, "category_id": 4, "name": "Es Teh Manis", "price": 3000, "stock": 40, "active": True, "rec": True, "description": "Teh manis dingin menyegarkan", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=300&q=80"}
+        {"id": 13, "category_id": 3, "name": "Seblak", "price": 10000, "stock": 15, "active": True, "rec": False, "description": "Seblak kuah pedas topping lengkap", "cat": "Mie dan Instan", "image": "🍲"},
+        {"id": 14, "category_id": 3, "name": "Bakso", "price": 10000, "stock": 20, "active": True, "rec": False, "description": "Bakso sapi kuah kaldu hangat", "cat": "Mie dan Instan", "image": "🥣"},
+        {"id": 15, "category_id": 3, "name": "Mie Tek-Tek", "price": 12000, "stock": 15, "active": True, "rec": False, "description": "Mie goreng kuah khas tek-tek", "cat": "Mie dan Instan", "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=300&q=80"},
+        {"id": 16, "category_id": 4, "name": "Es Teh Manis", "price": 3000, "stock": 40, "active": True, "rec": True, "description": "Teh manis dingin menyegarkan", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=300&q=80"},
+        {"id": 17, "category_id": 4, "name": "Es Cokelat", "price": 5000, "stock": 25, "active": True, "rec": False, "description": "Es cokelat manis pekat", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=300&q=80"},
+        {"id": 18, "category_id": 4, "name": "Lemon Tea", "price": 5000, "stock": 20, "active": True, "rec": False, "description": "Teh lemon segar asam manis", "cat": "Minuman", "image": "🥤"},
+        {"id": 19, "category_id": 4, "name": "Milk Tea", "price": 7000, "stock": 20, "active": True, "rec": False, "description": "Teh susu creamy nikmat", "cat": "Minuman", "image": "🧋"},
+        {"id": 20, "category_id": 4, "name": "Es Jeruk", "price": 5000, "stock": 25, "active": True, "rec": False, "description": "Es jeruk peras asli segar", "cat": "Minuman", "image": "🍊"},
+        {"id": 21, "category_id": 4, "name": "Air Mineral", "price": 3000, "stock": 50, "active": True, "rec": False, "description": "Air mineral botol 600ml", "cat": "Minuman", "image": "💧"},
+        {"id": 22, "category_id": 5, "name": "Pisang Cokelat", "price": 3000, "stock": 20, "active": True, "rec": False, "description": "Piscok lumer renyah", "cat": "Roti & Manis", "image": "🍌"},
+        {"id": 23, "category_id": 5, "name": "Roti Bakar", "price": 7000, "stock": 15, "active": True, "rec": False, "description": "Roti bakar selai cokelat keju", "cat": "Roti & Manis", "image": "🍞"},
+        {"id": 24, "category_id": 5, "name": "Donat", "price": 3000, "stock": 20, "active": True, "rec": False, "description": "Donat lembut tabur meses", "cat": "Roti & Manis", "image": "🍩"},
+        {"id": 25, "category_id": 5, "name": "Puding", "price": 4000, "stock": 15, "active": True, "rec": False, "description": "Puding cokelat lembut", "cat": "Roti & Manis", "image": "🍮"}
     ],
     "categories": [
         {"id": 1, "name": "Makanan Berat"},
@@ -50,16 +68,14 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         db = load_db()
         parsed_path = urllib.parse.urlparse(self.path)
-        path = parsed_path.path
+        path = parsed_path.path.rstrip('/')
         query = urllib.parse.parse_qs(parsed_path.query)
 
-        # Routing halaman utama ke index.html dan admin ke admin.html
-        if path == '/' or path == '':
+        if path == '' or path == '/':
             self.path = '/index.html'
         elif path == '/admin':
             self.path = '/admin.html'
         
-        # API Endpoints
         if path == '/api/menu':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
@@ -72,12 +88,11 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(response_data, ensure_ascii=False).encode('utf-8'))
             return
 
-        elif path == '/api/admin/orders' or path == '/api/orders':
+        elif path in ['/api/admin/orders', '/api/orders']:
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
             
-            # Filter berdasarkan kode jika diminta
             if 'codes' in query:
                 codes = query['codes'][0].split(',')
                 filtered = [o for o in db['orders'] if o.get('code') in codes]
@@ -97,11 +112,14 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         db = load_db()
+        parsed_path = urllib.parse.urlparse(self.path)
+        path = parsed_path.path.rstrip('/')
+        
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length)
         data = json.loads(body.decode('utf-8')) if body else {}
 
-        if self.path == '/api/orders':
+        if path == '/api/orders':
             import random
             code = 'ORD-' + str(random.randint(100, 999))
             
@@ -138,7 +156,7 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True, "code": code}, ensure_ascii=False).encode('utf-8'))
             return
 
-        elif self.path == '/api/admin/reset':
+        elif path == '/api/admin/reset':
             db['orders'] = []
             save_db(db)
             self.send_response(200)
@@ -147,16 +165,20 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True}, ensure_ascii=False).encode('utf-8'))
             return
 
-        return
+        self.send_response(404)
+        self.end_headers()
 
     def do_PUT(self):
         db = load_db()
+        parsed_path = urllib.parse.urlparse(self.path)
+        path = parsed_path.path.rstrip('/')
+        
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length)
         data = json.loads(body.decode('utf-8')) if body else {}
 
-        if '/api/admin/orders/' in self.path:
-            order_id_or_code = self.path.split('/')[-1]
+        if '/api/admin/orders' in path:
+            order_id_or_code = path.split('/')[-1]
             for o in db['orders']:
                 if str(o.get('code')) == str(order_id_or_code) or str(o.get('id')) == str(order_id_or_code):
                     if 'status' in data:
@@ -171,7 +193,7 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True}, ensure_ascii=False).encode('utf-8'))
             return
 
-        elif self.path == '/api/admin/po':
+        elif path == '/api/admin/po':
             db['po']['open_time'] = data.get('open_time', db['po']['open_time'])
             db['po']['close_time'] = data.get('close_time', db['po']['close_time'])
             db['po']['mode'] = data.get('mode', db['po']['mode'])
@@ -183,7 +205,8 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True}, ensure_ascii=False).encode('utf-8'))
             return
 
-        return
+        self.send_response(404)
+        self.end_headers()
 
 if __name__ == '__main__':
     print(f"Server berjalan di port {PORT}...")

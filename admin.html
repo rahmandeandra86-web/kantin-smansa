@@ -24,70 +24,94 @@ button{border:0;background:var(--g);color:#fff;padding:8px 13px;border-radius:8p
 <script>
 const $=s=>document.querySelector(s),rp=n=>'Rp'+Number(n||0).toLocaleString('id-ID'),esc=t=>String(t??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 
-function loadData(){
-  const O=JSON.parse(localStorage.ks_orders||'[]');
-  
-  const live=O.filter(o=>o.status!='Dibatalkan');
-  const sel=O.filter(o=>o.status=='Selesai');
-  const todo=live.filter(o=>o.status!='Selesai');
-  const rk={};
-  todo.forEach(o=>o.items.forEach(i=>rk[i.name]=(rk[i.name]||0)+i.qty));
-  
-  const kl={};
-  live.forEach(o=>(kl[o.kelas]=kl[o.kelas]||[]).push(o));
-  const ks=Object.keys(kl).sort();
-
-  $('#m').innerHTML=`
-    <div class="stats">
-      <div>Total pesanan<b>${live.length}</b></div>
-      <div>Pesanan baru<b>${O.filter(o=>o.status=='Menunggu konfirmasi').length}</b></div>
-      <div>Selesai<b>${sel.length}</b></div>
-      <div>Pendapatan<b>${rp(sel.reduce((a,o)=>a+o.total,0))}</b></div>
-    </div>
+async function loadData(){
+  try {
+    const res = await fetch('/api/admin/orders');
+    const O = await res.json();
     
-    <div class="card">
-      <h3>📊 Rekap Makanan yang Harus Disiapkan</h3>
-      <div class="rk">${Object.entries(rk).map(([n,q])=>`<div><span>${esc(n)}</span><b>${q} Porsi</b></div>`).join('')||'<small>Belum ada pesanan aktif.</small>'}</div>
-    </div>
+    const live=O.filter(o=>o.status!='Dibatalkan');
+    const sel=O.filter(o=>o.status=='Selesai');
+    const todo=live.filter(o=>o.status!='Selesai');
+    const rk={};
+    todo.forEach(o=>o.items.forEach(i=>rk[i.name]=(rk[i.name]||0)+i.qty));
+    
+    const kl={};
+    live.forEach(o=>(kl[o.kelas]=kl[o.kelas]||[]).push(o));
+    const ks=Object.keys(kl).sort();
 
-    <div class="card">
-      <h3>🏫 Kelola & Konfirmasi Pesanan Masuk dari Siswa</h3>
-      ${ks.map(k=>`
-        <div class="kl">
-          <h4><span>Kelas ${esc(k)}</span><small>${kl[k].length} pesanan</small></h4>
-          ${kl[k].map(o=>`
-            <div class="o">
-              <div>
-                <b>${esc(o.name)}</b> <small>${o.code} · ${o.created.replace('T',' ').slice(0,16)}</small><br>
-                ${o.items.map(i=>`<b>${i.qty}x</b> ${esc(i.name)}`).join(', ')}
-              </div>
-              <div style="text-align:right">
-                <b>${rp(o.total)}</b><br>
-                <small>Status: <b style="color:var(--g)">${o.status}</b></small><br>
-                <div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
-                  <button onclick="updateStatus('${o.code}', 'Dikonfirmasi')">Konfirmasi</button>
-                  <button class="s" onclick="updateStatus('${o.code}', 'Selesai')">Selesai</button>
-                  <button class="r" onclick="updateStatus('${o.code}', 'Dibatalkan')">Tolak</button>
+    $('#m').innerHTML=`
+      <div class="stats">
+        <div>Total pesanan<b>${live.length}</b></div>
+        <div>Pesanan baru<b>${O.filter(o=>o.status=='Menunggu konfirmasi').length}</b></div>
+        <div>Selesai<b>${sel.length}</b></div>
+        <div>Pendapatan<b>${rp(sel.reduce((a,o)=>a+o.total,0))}</b></div>
+      </div>
+      
+      <div class="card">
+        <h3>📊 Rekap Makanan yang Harus Disiapkan</h3>
+        <div class="rk">${Object.entries(rk).map(([n,q])=>`<div><span>${esc(n)}</span><b>${q} Porsi</b></div>`).join('')||'<small>Belum ada pesanan aktif.</small>'}</div>
+      </div>
+
+      <div class="card">
+        <h3>🏫 Kelola & Konfirmasi Pesanan Masuk dari Siswa</h3>
+        ${ks.map(k=>`
+          <div class="kl">
+            <h4><span>Kelas ${esc(k)}</span><small>${kl[k].length} pesanan</small></h4>
+            ${kl[k].map(o=>`
+              <div class="o">
+                <div>
+                  <b>${esc(o.name)}</b> <small>${o.code} · ${o.created.replace('T',' ').slice(0,16)}</small><br>
+                  ${o.items.map(i=>`<b>${i.qty}x</b> ${esc(i.name)}`).join(', ')}
                 </div>
-              </div>
-            </div>`).join('')}
-        </div>`).join('')||'<small>Belum ada pesanan masuk dari siswa.</small>'}
-    </div>
-  `;
+                <div style="text-align:right">
+                  <b>${rp(o.total)}</b><br>
+                  <small>Status: <b style="color:var(--g)">${o.status}</b></small><br>
+                  <div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
+                    <button onclick="updateStatus('${o.code}', 'Dikonfirmasi')">Konfirmasi</button>
+                    <button class="s" onclick="updateStatus('${o.code}', 'Selesai')">Selesai</button>
+                    <button class="r" onclick="updateStatus('${o.code}', 'Dibatalkan')">Tolak</button>
+                  </div>
+                </div>
+              </div>`).join('')}
+          </div>`).join('')||'<small>Belum ada pesanan masuk dari siswa.</small>'}
+      </div>
+    `;
+  } catch(e) {
+    $('#m').innerHTML='<div class="empty">Gagal memuat data dari server.</div>';
+  }
 }
 
-function updateStatus(code, newStatus){
-  let O=JSON.parse(localStorage.ks_orders||'[]');
-  O=O.map(o=>{if(o.code==code)o.status=newStatus;return o;});
-  localStorage.ks_orders=JSON.stringify(O);
-  loadData();
-  alert('Status pesanan '+code+' diubah menjadi: '+newStatus);
+async function updateStatus(code, newStatus){
+  try {
+    const res = await fetch('/api/admin/orders/' + code, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    const result = await res.json();
+    if(result.success){
+      loadData();
+      alert('Status pesanan '+code+' diubah menjadi: '+newStatus);
+    } else {
+      alert('Gagal memperbarui status');
+    }
+  } catch(e) {
+    alert('Kesalahan koneksi saat memperbarui status.');
+  }
 }
 
-function resetData(){
+async function resetData(){
   if(confirm('Yakin ingin mereset seluruh data pesanan?')){
-    localStorage.removeItem('ks_orders');
-    loadData();
+    try {
+      const res = await fetch('/api/admin/reset', { method: 'POST' });
+      const result = await res.json();
+      if(result.success){
+        loadData();
+        alert('Data pesanan berhasil direset.');
+      }
+    } catch(e) {
+      alert('Gagal mereset data.');
+    }
   }
 }
 

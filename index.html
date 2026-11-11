@@ -101,7 +101,6 @@ function del(id){delete cart[id];save();quote()}
 async function quote(){if(!count()){Q=null;return go('cart')}Q={subtotal:Object.entries(cart).reduce((a,[id,n])=>a+(M.products.find(p=>p.id==+id)?.price||0)*n,0),auto:0,voucher:0,total:0};Q.total=Q.subtotal;if(view=='cart')go('cart')}
 function go(v){
   view=v;['home','cart','orders'].forEach(x=>$('#n-'+x).classList.toggle('on',x==v));$('.search').style.display=v=='home'?'':'none';
-  // Sinkronisasi data terbaru dari localStorage agar status konfirmasi admin langsung nampak
   M.products=JSON.parse(localStorage.ks_products||JSON.stringify(DEFAULT_PRODUCTS));
   M.po=JSON.parse(localStorage.ks_po||JSON.stringify(M.po));
   
@@ -118,38 +117,63 @@ function go(v){
    <button class="big" onclick="order()">Konfirmasi pesanan</button><p id="er" class="err"></p>`}
   if(v=='orders')loadOrders()
 }
+
 async function order(){
   if(!S.name || !S.kelas){alert('Mohon isi Nama dan Kelas terlebih dahulu.');return;}
-  const code='ORD-'+Math.floor(100+Math.random()*900);
-  const r={
-    code,
-    name:S.name,
-    kelas:S.kelas,
-    status:'Menunggu konfirmasi',
-    items:items().map(i=>({...i,name:M.products.find(p=>p.id==i.id)?.name,price:M.products.find(p=>p.id==i.id)?.price})),
-    total:Object.entries(cart).reduce((a,[id,n])=>a+(M.products.find(p=>p.id==+id)?.price||0)*n,0),
-    payment:{method:S.pay,status:S.pay=='Tunai'?'Belum bayar':'Menunggu verifikasi'},
-    created:new Date().toISOString()
-  };
   
-  // Simpan ke localStorage bersama (ks_orders) agar langsung terbaca di admin.html
-  const allOrders=JSON.parse(localStorage.ks_orders||'[]');
-  allOrders.unshift(r);
-  localStorage.ks_orders=JSON.stringify(allOrders);
+  const payload = {
+    name: S.name,
+    kelas: S.kelas,
+    payment: S.pay,
+    note: S.note,
+    items: items()
+  };
 
-  cart={};save();Q=null;toast('Pesanan '+code+' berhasil dibuat');go('orders');
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    
+    if(result.success){
+      const myCodes = JSON.parse(localStorage.ks_my_codes || '[]');
+      myCodes.unshift(result.code);
+      localStorage.ks_my_codes = JSON.stringify(myCodes);
+
+      cart={}; save(); Q=null;
+      toast('Pesanan '+result.code+' berhasil dibuat');
+      go('orders');
+    } else {
+      alert('Gagal membuat pesanan');
+    }
+  } catch(err) {
+    alert('Terjadi kesalahan koneksi ke server.');
+  }
 }
+
 async function loadOrders(){
-  const allOrders=JSON.parse(localStorage.ks_orders||'[]');
-  if(!allOrders.length){$('#app').innerHTML='<div class="empty">Belum ada pesanan.</div>';return}
-  $('#app').innerHTML='<h2>Riwayat pesanan</h2>'+allOrders.map(o=>`
-    <div class="box sum">
-      <div><b>${o.code}</b><span class="badge" style="background:${o.status=='Dikonfirmasi'?'#d9f5e5':'#ffc83d'};color:#000">${o.status}</span></div>
-      <small style="color:var(--m)">${o.created.replace('T',' ').slice(0,16)} · ${esc(o.name)} (${o.kelas})</small>
-      ${o.items.map(i=>`<div><span>${i.qty}× ${esc(i.name)}</span><span>${rp(i.price*i.qty)}</span></div>`).join('')}
-      <div class="tot"><span>Total · ${o.payment.method}</span><span>${rp(o.total)}</span></div>
-      <small style="color:var(--m)">Status Pembayaran: ${o.payment.status}</small>
-    </div>`).join('');
+  const myCodes = JSON.parse(localStorage.ks_my_codes || '[]');
+  if(!myCodes.length){$('#app').innerHTML='<div class="empty">Belum ada pesanan.</div>';return}
+  
+  try {
+    const res = await fetch('/api/orders?codes=' + myCodes.join(','));
+    const orders = await res.json();
+    if(!orders.length){$('#app').innerHTML='<div class="empty">Belum ada pesanan.</div>';return}
+    
+    $('#app').innerHTML='<h2>Riwayat pesanan</h2>'+orders.map(o=>`
+      <div class="box sum">
+        <div><b>${o.code}</b><span class="badge" style="background:${o.status=='Dikonfirmasi'?'#d9f5e5':'#ffc83d'};color:#000">${o.status}</span></div>
+        <small style="color:var(--m)">${o.created.replace('T',' ').slice(0,16)} · ${esc(o.name)} (${o.kelas})</small>
+        ${o.items.map(i=>`<div><span>${i.qty}× ${esc(i.name)}</span><span>${rp(i.price*i.qty)}</span></div>`).join('')}
+        <div class="tot"><span>Total · ${o.payment.method}</span><span>${rp(o.total)}</span></div>
+        <small style="color:var(--m)">Status Pembayaran: ${o.payment.status}</small>
+      </div>`).join('');
+  } catch(e) {
+    $('#app').innerHTML='<div class="empty">Gagal memuat pesanan dari server.</div>';
+  }
 }
+
 setInterval(()=>{bi=(bi+1)%PR.length;const e=$('#bn');if(e)e.outerHTML=bnr()},5000);save();go('home');
 </script></body></html>
