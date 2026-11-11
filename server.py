@@ -4,7 +4,7 @@ import json
 import os
 import urllib.parse
 
-# Memastikan direktori kerja selalu otomatis sinkron dengan folder script ini
+# Memastikan direktori kerja server selalu sesuai dengan lokasi file server.py
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 PORT = int(os.environ.get('PORT', 8080))
