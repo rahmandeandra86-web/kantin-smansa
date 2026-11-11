@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Portal Penjual – Kantin Smansa</title>
+<style>
+:root{--a:#27324a;--g:#0a7d4f;--bg:#eef0f4;--w:#fff;--t:#1d2433;--m:#6b7385;--r:#d64545}
+@media(prefers-color-scheme:dark){:root{--bg:#14171f;--w:#1e2330;--t:#e6e9f0;--m:#98a0b3}}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--a);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+main{padding:12px;max-width:960px;margin:auto}.card{background:var(--w);border-radius:14px;padding:14px;margin-bottom:12px;overflow-x:auto}h3{margin:0 0 10px;font-size:15px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}.stats div{background:var(--w);border-radius:12px;padding:12px}.stats b{display:block;font-size:20px}
+.rk{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.rk div{background:#0a7d4f18;border-radius:10px;padding:10px;display:flex;justify-content:space-between;gap:8px}.rk b{background:var(--g);color:#fff;border-radius:8px;padding:1px 9px;white-space:nowrap}
+.kl{border:1px solid #8884;border-radius:12px;margin-bottom:10px;overflow:hidden}.kl>h4{margin:0;padding:9px 12px;background:#8881;display:flex;justify-content:space-between}
+.o{padding:10px 12px;border-top:1px solid #8883;display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between}.o.d{opacity:.6;background:#0a7d4f14}.o small{color:var(--m)}
+input,select{padding:8px;border:1px solid #8885;border-radius:8px;font:inherit;background:var(--bg);color:var(--t)}
+button{border:0;background:var(--g);color:#fff;padding:8px 13px;border-radius:8px;cursor:pointer;font:inherit}button.s{background:#8883;color:var(--t)}button.r{background:#fbdcdc;color:#8b1f1f}
+.f{display:flex;flex-wrap:wrap;gap:8px;align-items:end}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:6px;border-bottom:1px solid #8883}
+</style></head><body>
+<header><b>🍳 Portal Penjual · Kantin Smansa</b><div class="f"><button class="r" onclick="resetData()">🗑️ Reset Data</button><button onclick="loadData()">🔄 Muat Ulang</button></div></header>
+<main id="m">Memuat…</main>
+<script>
+const $=s=>document.querySelector(s),rp=n=>'Rp'+Number(n||0).toLocaleString('id-ID'),esc=t=>String(t??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+
+function loadData(){
+  const O=JSON.parse(localStorage.ks_orders||'[]');
+  
+  const live=O.filter(o=>o.status!='Dibatalkan');
+  const sel=O.filter(o=>o.status=='Selesai');
+  const todo=live.filter(o=>o.status!='Selesai');
+  const rk={};
+  todo.forEach(o=>o.items.forEach(i=>rk[i.name]=(rk[i.name]||0)+i.qty));
+  
+  const kl={};
+  live.forEach(o=>(kl[o.kelas]=kl[o.kelas]||[]).push(o));
+  const ks=Object.keys(kl).sort();
+
+  $('#m').innerHTML=`
+    <div class="stats">
+      <div>Total pesanan<b>${live.length}</b></div>
+      <div>Pesanan baru<b>${O.filter(o=>o.status=='Menunggu konfirmasi').length}</b></div>
+      <div>Selesai<b>${sel.length}</b></div>
+      <div>Pendapatan<b>${rp(sel.reduce((a,o)=>a+o.total,0))}</b></div>
+    </div>
+    
+    <div class="card">
+      <h3>📊 Rekap Makanan yang Harus Disiapkan</h3>
+      <div class="rk">${Object.entries(rk).map(([n,q])=>`<div><span>${esc(n)}</span><b>${q} Porsi</b></div>`).join('')||'<small>Belum ada pesanan aktif.</small>'}</div>
+    </div>
+
+    <div class="card">
+      <h3>🏫 Kelola & Konfirmasi Pesanan Masuk dari Siswa</h3>
+      ${ks.map(k=>`
+        <div class="kl">
+          <h4><span>Kelas ${esc(k)}</span><small>${kl[k].length} pesanan</small></h4>
+          ${kl[k].map(o=>`
+            <div class="o">
+              <div>
+                <b>${esc(o.name)}</b> <small>${o.code} · ${o.created.replace('T',' ').slice(0,16)}</small><br>
+                ${o.items.map(i=>`<b>${i.qty}x</b> ${esc(i.name)}`).join(', ')}
+              </div>
+              <div style="text-align:right">
+                <b>${rp(o.total)}</b><br>
+                <small>Status: <b style="color:var(--g)">${o.status}</b></small><br>
+                <div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
+                  <button onclick="updateStatus('${o.code}', 'Dikonfirmasi')">Konfirmasi</button>
+                  <button class="s" onclick="updateStatus('${o.code}', 'Selesai')">Selesai</button>
+                  <button class="r" onclick="updateStatus('${o.code}', 'Dibatalkan')">Tolak</button>
+                </div>
+              </div>
+            </div>`).join('')}
+        </div>`).join('')||'<small>Belum ada pesanan masuk dari siswa.</small>'}
+    </div>
+  `;
+}
+
+function updateStatus(code, newStatus){
+  let O=JSON.parse(localStorage.ks_orders||'[]');
+  O=O.map(o=>{if(o.code==code)o.status=newStatus;return o;});
+  localStorage.ks_orders=JSON.stringify(O);
+  loadData();
+  alert('Status pesanan '+code+' diubah menjadi: '+newStatus);
+}
+
+function resetData(){
+  if(confirm('Yakin ingin mereset seluruh data pesanan?')){
+    localStorage.removeItem('ks_orders');
+    loadData();
+  }
+}
+
+loadData();
+setInterval(loadData, 2000); // Sinkronisasi otomatis setiap 2 detik
+</script></body>
+</html>

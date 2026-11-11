@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kantin Smansa</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--g:#0a7d4f;--gd:#065c3a;--y:#ffc83d;--bg:#f5f7f4;--t:#1b2420;--m:#6b7870;--w:#fff;--r:#d64545}
+@media(prefers-color-scheme:dark){:root{--bg:#121a16;--t:#e8efea;--m:#9aa8a0;--w:#1c2621}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--t);padding-bottom:86px}
+main{max-width:720px;margin:auto;padding:0 14px}header{background:var(--g);color:#fff;padding:18px 14px 56px;border-radius:0 0 26px 26px}
+header div{max-width:720px;margin:auto}h1{margin:0;font-size:24px;font-weight:800}header p{margin:2px 0 0;opacity:.85}
+.search{max-width:720px;margin:-26px auto 0;padding:0 14px}.search input{width:100%;padding:14px 16px;border:0;border-radius:14px;font:inherit;background:var(--w);color:var(--t);box-shadow:0 4px 14px #0002}
+.po{margin:14px 0;padding:12px 14px;border-radius:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px}.po.open{background:#d9f5e5;color:#065c3a}.po.soon{background:#fff0c2;color:#7a5200}.po.closed{background:#fbdcdc;color:#8b1f1f}
+.banner{background:linear-gradient(120deg,var(--y),#ffdf85);color:#3a2d00;border-radius:16px;padding:16px;margin-bottom:12px}.banner b{font-size:17px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px}.chip{border:0;padding:8px 16px;border-radius:99px;background:var(--w);color:var(--t);font:inherit;font-weight:600;white-space:nowrap;cursor:pointer}.chip.on{background:var(--g);color:#fff}
+h2{font-size:17px;margin:16px 0 8px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--w);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s}.card:active{transform:scale(.98)}
+.pic{height:96px;display:flex;align-items:center;justify-content:center;font-size:46px;background:#e6efe9}.pic img{width:100%;height:100%;object-fit:cover}
+.info{padding:10px;flex:1;display:flex;flex-direction:column;gap:3px}.info small{color:var(--m)}.price{font-weight:800;color:var(--g)}
+button.add{margin-top:auto;border:0;background:var(--g);color:#fff;padding:9px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:10px;background:var(--w);padding:10px;border-radius:14px;margin-bottom:8px}.row .grow{flex:1}.qty{display:flex;align-items:center;gap:8px}.qty button{width:30px;height:30px;border-radius:50%;border:0;background:var(--bg);color:var(--t);font-size:18px;cursor:pointer}
+.box{background:var(--w);padding:14px;border-radius:16px;margin:10px 0}.box input,.box select{width:100%;padding:11px;margin:4px 0 10px;border:1px solid #8884;border-radius:10px;font:inherit;background:var(--bg);color:var(--t)}
+.sum div{display:flex;justify-content:space-between;padding:3px 0}.tot{font-weight:800;font-size:17px;border-top:1px dashed #8886;margin-top:6px;padding-top:8px}
+.err{color:var(--r);font-size:13px}.ok{color:var(--g);font-size:13px}.big{width:100%;padding:14px;border:0;border-radius:14px;background:var(--g);color:#fff;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.pay label{display:flex;gap:8px;align-items:center;padding:6px 0}.pay input{width:auto;margin:0}.badge{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--y);color:#3a2d00;font-size:12px;font-weight:700}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--w);display:flex;justify-content:space-around;padding:10px 0;box-shadow:0 -2px 12px #0002;z-index:99}
+nav button{background:none;border:0;font:inherit;color:var(--m);display:flex;flex-direction:column;align-items:center;font-size:12px;cursor:pointer;position:relative}nav button.on{color:var(--g);font-weight:700}nav span{font-size:22px}nav i{position:absolute;top:-4px;right:-2px;background:var(--r);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;font-style:normal}
+.empty{text-align:center;color:var(--m);padding:40px 10px}.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:99px;animation:f .25s}@keyframes f{from{opacity:0;transform:translate(-50%,10px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<header><div><h1>🍽️ Kantin Smansa</h1><p>Pesan dulu, ambil saat istirahat.</p></div></header>
+<div class="search"><input id="s" placeholder="Cari makanan atau minuman…" oninput="q=this.value;go('home');"></div>
+<main id="app"></main>
+
+<nav>
+  <button id="n-home" onclick="go('home')"><span>🏠</span>Beranda</button>
+  <button id="n-cart" onclick="go('cart')"><span>🛒</span>Keranjang<i id="cc"></i></button>
+  <button id="n-orders" onclick="go('orders')"><span>🧾</span>Pesanan</button>
+</nav>
+
+<script>
+const $=s=>document.querySelector(s),rp=n=>'Rp'+Number(n).toLocaleString('id-ID'),esc=t=>String(t).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const KELAS=Array.from({length:12},(_,i)=>'XII.F'+(i+1));
+const PR=[{t:'Promo Spesial',h:'Diskon Rp5.000!',d:'Pakai kode SMANSAGEMBIRA (min. belanja Rp50.000).',i:'🎉',bg:'#0a7d4f,#13a06a'},{t:'Menu Terlaris',h:'Nasi Ayam Geprek paling dicari!',d:'Cepat pesan sebelum kehabisan porsi hari ini.',i:'🔥',bg:'#d97706,#f59e0b'},{t:'Bebas Antre',h:'Pre-Order sekarang, ambil langsung!',d:'Tidak perlu desak-desakan saat jam istirahat.',i:'⚡',bg:'#3b5bdb,#5c7cfa'},{t:'Hemat',h:'Belanja di atas Rp100.000',d:'Otomatis dapat diskon Rp5.000.',i:'💰',bg:'#087f5b,#20c997'}];let bi=0;const bnr=()=>{const p=PR[bi];return `<div class="banner" id="bn" style="background:linear-gradient(120deg,${p.bg});color:#fff"><small>${p.t}</small><br><b>${p.i} ${p.h}</b><br>${p.d}</div>`};
+
+const DEFAULT_PRODUCTS=[
+  {id:1,category_id:1,name:'Nasi Goreng Telur',price:12000,stock:15,active:true,rec:true,description:'Nasi goreng gurih dengan telur',cat:'Makanan Berat',image:'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=300&q=80'},
+  {id:2,category_id:1,name:'Nasi Ayam Geprek',price:15000,stock:12,active:true,rec:true,description:'Ayam crispy dengan sambal geprek pedas',cat:'Makanan Berat',image:'https://images.unsplash.com/photo-1626509492160-e4fe9e9f3b89?auto=format&fit=crop&w=300&q=80'},
+  {id:3,category_id:1,name:'Nasi Telur Kecap',price:10000,stock:20,active:true,rec:false,description:'Nasi putih dengan telur ceplok kecap',cat:'Makanan Berat',image:'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80'},
+  {id:4,category_id:1,name:'Nasi Ayam Suwir',price:13000,stock:15,active:true,rec:false,description:'Nasi dengan suwiran ayam berbumbu',cat:'Makanan Berat',image:'🍽️'},
+  {id:5,category_id:1,name:'Nasi Uduk',price:10000,stock:25,active:true,rec:false,description:'Nasi uduk harum khas lengkap',cat:'Makanan Berat',image:'🍽️'},
+  {id:6,category_id:2,name:'Bakwan',price:2000,stock:30,active:true,rec:false,description:'Bakwan sayur renyah hangat',cat:'Makanan Ringan',image:'🥠'},
+  {id:7,category_id:2,name:'Risoles',price:3000,stock:25,active:true,rec:false,description:'Risoles isi sayur/ragout',cat:'Makanan Ringan',image:'🥟'},
+  {id:8,category_id:2,name:'Tahu Isi',price:2000,stock:30,active:true,rec:false,description:'Tahu goreng isi sayuran pedas',cat:'Makanan Ringan',image:'🧆'},
+  {id:9,category_id:2,name:'Cireng',price:5000,stock:20,active:true,rec:false,description:'Cireng kenyal bumbu rujak',cat:'Makanan Ringan',image:'🍘'},
+  {id:10,category_id:2,name:'Sosis Bakar',price:5000,stock:15,active:true,rec:false,description:'Sosis panggang saus spesial',cat:'Makanan Ringan',image:'🌭'},
+  {id:11,category_id:2,name:'Kentang Goreng',price:7000,stock:15,active:true,rec:false,description:'French fries gurih renyah',cat:'Makanan Ringan',image:'🍟'},
+  {id:12,category_id:3,name:'Mie Ayam',price:12000,stock:15,active:true,rec:true,description:'Mie kenyal topping ayam gurih',cat:'Mie dan Instan',image:'🍜'},
+  {id:13,category_id:3,name:'Seblak',price:10000,stock:15,active:true,rec:false,description:'Seblak kuah pedas topping lengkap',cat:'Mie dan Instan',image:'🍲'},
+  {id:14,category_id:3,name:'Bakso',price:10000,stock:20,active:true,rec:false,description:'Bakso sapi kuah kaldu hangat',cat:'Mie dan Instan',image:'🥣'},
+  {id:15,category_id:3,name:'Mie Tek-Tek',price:12000,stock:15,active:true,rec:false,description:'Mie goreng kuah khas tek-tek',cat:'Mie dan Instan',image:'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=300&q=80'},
+  {id:16,category_id:4,name:'Es Teh Manis',price:3000,stock:40,active:true,rec:true,description:'Teh manis dingin menyegarkan',cat:'Minuman',image:'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=300&q=80'},
+  {id:17,category_id:4,name:'Es Cokelat',price:5000,stock:25,active:true,rec:false,description:'Es cokelat manis pekat',cat:'Minuman',image:'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=300&q=80'},
+  {id:18,category_id:4,name:'Lemon Tea',price:5000,stock:20,active:true,rec:false,description:'Teh lemon segar asam manis',cat:'Minuman',image:'🥤'},
+  {id:19,category_id:4,name:'Milk Tea',price:7000,stock:20,active:true,rec:false,description:'Teh susu creamy nikmat',cat:'Minuman',image:'🧋'},
+  {id:20,category_id:4,name:'Es Jeruk',price:5000,stock:25,active:true,rec:false,description:'Es jeruk peras asli segar',cat:'Minuman',image:'🍊'},
+  {id:21,category_id:4,name:'Air Mineral',price:3000,stock:50,active:true,rec:false,description:'Air mineral botol 600ml',cat:'Minuman',image:'💧'},
+  {id:22,category_id:5,name:'Pisang Cokelat',price:3000,stock:20,active:true,rec:false,description:'Piscok lumer renyah',cat:'Roti & Manis',image:'🍌'},
+  {id:23,category_id:5,name:'Roti Bakar',price:7000,stock:15,active:true,rec:false,description:'Roti bakar selai cokelat keju',cat:'Roti & Manis',image:'🍞'},
+  {id:24,category_id:5,name:'Donat',price:3000,stock:20,active:true,rec:false,description:'Donat lembut tabur meses',cat:'Roti & Manis',image:'🍩'},
+  {id:25,category_id:5,name:'Puding',price:4000,stock:15,active:true,rec:false,description:'Puding cokelat lembut',cat:'Roti & Manis',image:'🍮'}
+];
+
+let M={
+  categories:[
+    {id:1,name:'Makanan Berat'},
+    {id:2,name:'Makanan Ringan'},
+    {id:3,name:'Mie & Instan'},
+    {id:4,name:'Minuman'},
+    {id:5,name:'Roti & Manis'}
+  ],
+  products:JSON.parse(localStorage.ks_products||JSON.stringify(DEFAULT_PRODUCTS)),
+  po:JSON.parse(localStorage.ks_po||JSON.stringify({status:'open',label:'Pre-Order Dibuka',open_time:'07:00',close_time:'12:00'}))
+};
+
+let cart=JSON.parse(localStorage.ks_cart||'{}'),cat=0,q='',view='home',S={name:localStorage.ks_name||'',kelas:localStorage.ks_kelas||'',code:'',pay:'Tunai',note:''},Q=null;
+
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2200)}
+const pic=p=>p.image.startsWith('http')||p.image.startsWith('data:')?`<img src="${p.image}" alt="">`:p.image;
+const items=()=>Object.entries(cart).map(([id,qty])=>({id:+id,qty}));
+const count=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+function save(){localStorage.ks_cart=JSON.stringify(cart);$('#cc').textContent=count()||'';$('#cc').style.display=count()?'':'none'}
+function poBar(){const p=M.po;return `<div class="po ${p.status}" id="po"><span>${p.label}</span><span>Buka ${p.open_time}–${p.close_time}</span></div>`}
+function card(p){const off=!p.active||p.stock<1||M.po.status=='closed';return `<div class="card"><div class="pic">${pic(p)}</div><div class="info"><b>${esc(p.name)}</b><small>${esc(p.description)}</small><small>${esc(p.cat)} · Sisa ${p.stock} porsi</small><span class="price">${rp(p.price)}</span><button class="add" ${off?'disabled':''} onclick="add(${p.id})">${!p.active||p.stock<1?'Habis':M.po.status=='closed'?'PO ditutup':'+ Keranjang'}</button></div></div>`}
+
+function add(id){const p=M.products.find(x=>x.id==id);if(p&&(cart[id]||0)>=p.stock)return toast('Stok tinggal '+p.stock+' porsi');cart[id]=(cart[id]||0)+1;save();toast('Masuk keranjang')}
+function chg(id,d){const p=M.products.find(x=>x.id==id);if(d>0&&p&&cart[id]>=p.stock)return toast('Stok tinggal '+p.stock+' porsi');cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];save();quote()}
+function del(id){delete cart[id];save();quote()}
+async function quote(){if(!count()){Q=null;return go('cart')}Q={subtotal:Object.entries(cart).reduce((a,[id,n])=>a+(M.products.find(p=>p.id==+id)?.price||0)*n,0),auto:0,voucher:0,total:0};Q.total=Q.subtotal;if(view=='cart')go('cart')}
+function go(v){
+  view=v;['home','cart','orders'].forEach(x=>$('#n-'+x).classList.toggle('on',x==v));$('.search').style.display=v=='home'?'':'none';
+  // Sinkronisasi data terbaru dari localStorage agar status konfirmasi admin langsung nampak
+  M.products=JSON.parse(localStorage.ks_products||JSON.stringify(DEFAULT_PRODUCTS));
+  M.po=JSON.parse(localStorage.ks_po||JSON.stringify(M.po));
+  
+  const a=$('#app');
+  if(v=='home'){const t=q.toLowerCase(),f=M.products.filter(p=>(!cat||p.category_id==cat)&&(p.name+p.description).toLowerCase().includes(t));
+   a.innerHTML=poBar()+(q||cat?'':bnr())+`<div class="chips"><button class="chip ${!cat?'on':''}" onclick="cat=0;go('home')">Semua</button>${M.categories.map(c=>`<button class="chip ${cat==c.id?'on':''}" onclick="cat=${c.id};go('home')">${esc(c.name)}</button>`).join('')}</div>`+`<h2>${q||cat?'Hasil':'Menu Favorit Hari Ini'}</h2>`+(f.length?`<div class="grid">${f.map(card).join('')}</div>`:'<div class="empty">Menu tidak ditemukan.</div>')}
+  if(v=='cart'){if(!count()){a.innerHTML='<div class="empty">Keranjang kosong.<br>Pilih menu dulu di Beranda.</div>';return}
+   const ps=Object.fromEntries(M.products.map(p=>[p.id,p]));
+   a.innerHTML=poBar()+'<h2>Keranjang</h2>'+Object.entries(cart).map(([id,n])=>{const p=ps[id];return p?`<div class="row"><div class="pic" style="width:56px;height:56px;border-radius:10px;font-size:28px">${pic(p)}</div><div class="grow"><b>${esc(p.name)}</b><br><span class="price">${rp(p.price*n)}</span></div><div class="qty"><button onclick="chg(${id},-1)">−</button><b>${n}</b><button onclick="chg(${id},1)">+</button></div><button class="qty" style="border:0;background:none;cursor:pointer" onclick="del(${id})" aria-label="Hapus">🗑️</button></div>`:''}).join('')+
+   `<div class="box"><b>Identitas siswa</b><input id="nm" placeholder="Nama lengkap" value="${esc(S.name)}" oninput="S.name=this.value"><select id="kl" onchange="S.kelas=this.value"><option value="">Pilih kelas</option>${KELAS.map(k=>`<option ${S.kelas==k?'selected':''}>${k}</option>`).join('')}</select></div>
+   <div class="box"><b>Voucher</b><div style="display:flex;gap:8px"><input id="vc" placeholder="Kode voucher (cth: SMANSAGEMBIRA)" value="${esc(S.code)}" oninput="S.code=this.value.toUpperCase()"><button class="add" style="padding:0 16px;height:44px;margin-top:4px" onclick="quote()">Pakai</button></div></div>
+   <div class="box pay"><b>Pembayaran</b>${['Tunai','Transfer bank','QRIS'].map(m=>`<label><input type="radio" name="pm" ${S.pay==m?'checked':''} onchange="S.pay='${m}';go('cart')">${m}${m=='Tunai'?' (bayar saat ambil)':''}</label>`).join('')}</div>
+   <div class="box sum">${Q&&!Q.error?`<div><span>Subtotal</span><span>${rp(Q.subtotal)}</span></div><div class="tot"><span>Total bayar</span><span>${rp(Q.total)}</span></div>`:`<div class="err">${Q?Q.error:'Menghitung…'}</div>`}</div>
+   <button class="big" onclick="order()">Konfirmasi pesanan</button><p id="er" class="err"></p>`}
+  if(v=='orders')loadOrders()
+}
+async function order(){
+  if(!S.name || !S.kelas){alert('Mohon isi Nama dan Kelas terlebih dahulu.');return;}
+  const code='ORD-'+Math.floor(100+Math.random()*900);
+  const r={
+    code,
+    name:S.name,
+    kelas:S.kelas,
+    status:'Menunggu konfirmasi',
+    items:items().map(i=>({...i,name:M.products.find(p=>p.id==i.id)?.name,price:M.products.find(p=>p.id==i.id)?.price})),
+    total:Object.entries(cart).reduce((a,[id,n])=>a+(M.products.find(p=>p.id==+id)?.price||0)*n,0),
+    payment:{method:S.pay,status:S.pay=='Tunai'?'Belum bayar':'Menunggu verifikasi'},
+    created:new Date().toISOString()
+  };
+  
+  // Simpan ke localStorage bersama (ks_orders) agar langsung terbaca di admin.html
+  const allOrders=JSON.parse(localStorage.ks_orders||'[]');
+  allOrders.unshift(r);
+  localStorage.ks_orders=JSON.stringify(allOrders);
+
+  cart={};save();Q=null;toast('Pesanan '+code+' berhasil dibuat');go('orders');
+}
+async function loadOrders(){
+  const allOrders=JSON.parse(localStorage.ks_orders||'[]');
+  if(!allOrders.length){$('#app').innerHTML='<div class="empty">Belum ada pesanan.</div>';return}
+  $('#app').innerHTML='<h2>Riwayat pesanan</h2>'+allOrders.map(o=>`
+    <div class="box sum">
+      <div><b>${o.code}</b><span class="badge" style="background:${o.status=='Dikonfirmasi'?'#d9f5e5':'#ffc83d'};color:#000">${o.status}</span></div>
+      <small style="color:var(--m)">${o.created.replace('T',' ').slice(0,16)} · ${esc(o.name)} (${o.kelas})</small>
+      ${o.items.map(i=>`<div><span>${i.qty}× ${esc(i.name)}</span><span>${rp(i.price*i.qty)}</span></div>`).join('')}
+      <div class="tot"><span>Total · ${o.payment.method}</span><span>${rp(o.total)}</span></div>
+      <small style="color:var(--m)">Status Pembayaran: ${o.payment.status}</small>
+    </div>`).join('');
+}
+setInterval(()=>{bi=(bi+1)%PR.length;const e=$('#bn');if(e)e.outerHTML=bnr()},5000);save();go('home');
+</script></body></html>
