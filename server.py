@@ -4,6 +4,9 @@ import json
 import os
 import urllib.parse
 
+# Memastikan direktori kerja selalu otomatis sinkron dengan folder script ini
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 PORT = int(os.environ.get('PORT', 8080))
 DB_FILE = 'database.json'
 
@@ -50,8 +53,9 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_path.path
         query = urllib.parse.parse_qs(parsed_path.query)
 
+        # Routing halaman utama ke index.html dan admin ke admin.html
         if path == '/' or path == '':
-            self.path = '/customer.html'
+            self.path = '/index.html'
         elif path == '/admin':
             self.path = '/admin.html'
         
@@ -98,11 +102,9 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
         data = json.loads(body.decode('utf-8')) if body else {}
 
         if self.path == '/api/orders':
-            # Siswa membuat pesanan baru
             import random
             code = 'ORD-' + str(random.randint(100, 999))
             
-            # Hitung total harga
             total = 0
             processed_items = []
             for item in data.get('items', []):
