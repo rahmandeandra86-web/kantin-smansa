@@ -10,34 +10,34 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 PORT = int(os.environ.get('PORT', 8080))
 DB_FILE = 'database.json'
 
-# Data Default jika database belum ada
+# Data Default dengan produk yang sudah memiliki foto relevan
 DEFAULT_DB = {
     "products": [
         {"id": 1, "category_id": 1, "name": "Nasi Goreng Telur", "price": 12000, "stock": 15, "active": True, "rec": True, "description": "Nasi goreng gurih dengan telur", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=300&q=80"},
         {"id": 2, "category_id": 1, "name": "Nasi Ayam Geprek", "price": 15000, "stock": 12, "active": True, "rec": True, "description": "Ayam crispy dengan sambal geprek pedas", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1626509492160-e4fe9e9f3b89?auto=format&fit=crop&w=300&q=80"},
         {"id": 3, "category_id": 1, "name": "Nasi Telur Kecap", "price": 10000, "stock": 20, "active": True, "rec": False, "description": "Nasi putih dengan telur ceplok kecap", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&w=300&q=80"},
-        {"id": 4, "category_id": 1, "name": "Nasi Ayam Suwir", "price": 13000, "stock": 15, "active": True, "rec": False, "description": "Nasi dengan suwiran ayam berbumbu", "cat": "Makanan Berat", "image": "🍽️"},
-        {"id": 5, "category_id": 1, "name": "Nasi Uduk", "price": 10000, "stock": 25, "active": True, "rec": False, "description": "Nasi uduk harum khas lengkap", "cat": "Makanan Berat", "image": "🍽️"},
-        {"id": 6, "category_id": 2, "name": "Bakwan", "price": 2000, "stock": 30, "active": True, "rec": False, "description": "Bakwan sayur renyah hangat", "cat": "Makanan Ringan", "image": "🥠"},
-        {"id": 7, "category_id": 2, "name": "Risoles", "price": 3000, "stock": 25, "active": True, "rec": False, "description": "Risoles isi sayur/ragout", "cat": "Makanan Ringan", "image": "🥟"},
-        {"id": 8, "category_id": 2, "name": "Tahu Isi", "price": 2000, "stock": 30, "active": True, "rec": False, "description": "Tahu goreng isi sayuran pedas", "cat": "Makanan Ringan", "image": "🧆"},
-        {"id": 9, "category_id": 2, "name": "Cireng", "price": 5000, "stock": 20, "active": True, "rec": False, "description": "Cireng kenyal bumbu rujak", "cat": "Makanan Ringan", "image": "🍘"},
-        {"id": 10, "category_id": 2, "name": "Sosis Bakar", "price": 5000, "stock": 15, "active": True, "rec": False, "description": "Sosis panggang saus spesial", "cat": "Makanan Ringan", "image": "🌭"},
-        {"id": 11, "category_id": 2, "name": "Kentang Goreng", "price": 7000, "stock": 15, "active": True, "rec": False, "description": "French fries gurih renyah", "cat": "Makanan Ringan", "image": "🍟"},
-        {"id": 12, "category_id": 3, "name": "Mie Ayam", "price": 12000, "stock": 15, "active": True, "rec": True, "description": "Mie kenyal topping ayam gurih", "cat": "Mie dan Instan", "image": "🍜"},
-        {"id": 13, "category_id": 3, "name": "Seblak", "price": 10000, "stock": 15, "active": True, "rec": False, "description": "Seblak kuah pedas topping lengkap", "cat": "Mie dan Instan", "image": "🍲"},
-        {"id": 14, "category_id": 3, "name": "Bakso", "price": 10000, "stock": 20, "active": True, "rec": False, "description": "Bakso sapi kuah kaldu hangat", "cat": "Mie dan Instan", "image": "🥣"},
-        {"id": 15, "category_id": 3, "name": "Mie Tek-Tek", "price": 12000, "stock": 15, "active": True, "rec": False, "description": "Mie goreng kuah khas tek-tek", "cat": "Mie dan Instan", "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=300&q=80"},
+        {"id": 4, "category_id": 1, "name": "Nasi Ayam Suwir", "price": 13000, "stock": 15, "active": True, "rec": False, "description": "Nasi dengan suwiran ayam berbumbu", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=300&q=80"},
+        {"id": 5, "category_id": 1, "name": "Nasi Uduk", "price": 10000, "stock": 25, "active": True, "rec": False, "description": "Nasi uduk harum khas lengkap", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=300&q=80"},
+        {"id": 6, "category_id": 2, "name": "Bakwan", "price": 2000, "stock": 30, "active": True, "rec": False, "description": "Bakwan sayur renyah hangat", "cat": "Makanan Ringan", "image": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=300&q=80"},
+        {"id": 7, "category_id": 2, "name": "Risoles", "price": 3000, "stock": 25, "active": True, "rec": False, "description": "Risoles isi sayur/ragout", "cat": "Makanan Ringan", "image": "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=300&q=80"},
+        {"id": 8, "category_id": 2, "name": "Tahu Isi", "price": 2000, "stock": 30, "active": True, "rec": False, "description": "Tahu goreng isi sayuran pedas", "cat": "Makanan Ringan", "image": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=300&q=80"},
+        {"id": 9, "category_id": 2, "name": "Cireng", "price": 5000, "stock": 20, "active": True, "rec": False, "description": "Cireng kenyal bumbu rujak", "cat": "Makanan Ringan", "image": "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=300&q=80"},
+        {"id": 10, "category_id": 2, "name": "Sosis Bakar", "price": 5000, "stock": 15, "active": True, "rec": False, "description": "Sosis panggang saus spesial", "cat": "Makanan Ringan", "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=300&q=80"},
+        {"id": 11, "category_id": 2, "name": "Kentang Goreng", "price": 7000, "stock": 15, "active": True, "rec": False, "description": "French fries gurih renyah", "cat": "Makanan Ringan", "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=300&q=80"},
+        {"id": 12, "category_id": 3, "name": "Mie Ayam", "price": 12000, "stock": 15, "active": True, "rec": True, "description": "Mie kenyal topping ayam gurih", "cat": "Mie dan Instan", "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=300&q=80"},
+        {"id": 13, "category_id": 3, "name": "Seblak", "price": 10000, "stock": 15, "active": True, "rec": False, "description": "Seblak kuah pedas topping lengkap", "cat": "Mie dan Instan", "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80"},
+        {"id": 14, "category_id": 3, "name": "Bakso", "price": 10000, "stock": 20, "active": True, "rec": False, "description": "Bakso sapi kuah kaldu hangat", "cat": "Mie dan Instan", "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=300&q=80"},
+        {"id": 15, "category_id": 3, "name": "Mie Tek-Tek", "price": 12000, "stock": 15, "active": True, "rec": False, "description": "Mie goreng kuah khas tek-tek", "cat": "Mie dan Instan", "image": "https://images.unsplash.com/photo-1612927601101-413e17cac59a?auto=format&fit=crop&w=300&q=80"},
         {"id": 16, "category_id": 4, "name": "Es Teh Manis", "price": 3000, "stock": 40, "active": True, "rec": True, "description": "Teh manis dingin menyegarkan", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=300&q=80"},
         {"id": 17, "category_id": 4, "name": "Es Cokelat", "price": 5000, "stock": 25, "active": True, "rec": False, "description": "Es cokelat manis pekat", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=300&q=80"},
-        {"id": 18, "category_id": 4, "name": "Lemon Tea", "price": 5000, "stock": 20, "active": True, "rec": False, "description": "Teh lemon segar asam manis", "cat": "Minuman", "image": "🥤"},
-        {"id": 19, "category_id": 4, "name": "Milk Tea", "price": 7000, "stock": 20, "active": True, "rec": False, "description": "Teh susu creamy nikmat", "cat": "Minuman", "image": "🧋"},
-        {"id": 20, "category_id": 4, "name": "Es Jeruk", "price": 5000, "stock": 25, "active": True, "rec": False, "description": "Es jeruk peras asli segar", "cat": "Minuman", "image": "🍊"},
-        {"id": 21, "category_id": 4, "name": "Air Mineral", "price": 3000, "stock": 50, "active": True, "rec": False, "description": "Air mineral botol 600ml", "cat": "Minuman", "image": "💧"},
-        {"id": 22, "category_id": 5, "name": "Pisang Cokelat", "price": 3000, "stock": 20, "active": True, "rec": False, "description": "Piscok lumer renyah", "cat": "Roti & Manis", "image": "🍌"},
-        {"id": 23, "category_id": 5, "name": "Roti Bakar", "price": 7000, "stock": 15, "active": True, "rec": False, "description": "Roti bakar selai cokelat keju", "cat": "Roti & Manis", "image": "🍞"},
-        {"id": 24, "category_id": 5, "name": "Donat", "price": 3000, "stock": 20, "active": True, "rec": False, "description": "Donat lembut tabur meses", "cat": "Roti & Manis", "image": "🍩"},
-        {"id": 25, "category_id": 5, "name": "Puding", "price": 4000, "stock": 15, "active": True, "rec": False, "description": "Puding cokelat lembut", "cat": "Roti & Manis", "image": "🍮"}
+        {"id": 18, "category_id": 4, "name": "Lemon Tea", "price": 5000, "stock": 20, "active": True, "rec": False, "description": "Teh lemon segar asam manis", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=300&q=80"},
+        {"id": 19, "category_id": 4, "name": "Milk Tea", "price": 7000, "stock": 20, "active": True, "rec": False, "description": "Teh susu creamy nikmat", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1541658016709-82535e94bc69?auto=format&fit=crop&w=300&q=80"},
+        {"id": 20, "category_id": 4, "name": "Es Jeruk", "price": 5000, "stock": 25, "active": True, "rec": False, "description": "Es jeruk peras asli segar", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=300&q=80"},
+        {"id": 21, "category_id": 4, "name": "Air Mineral", "price": 3000, "stock": 50, "active": True, "rec": False, "description": "Air mineral botol 600ml", "cat": "Minuman", "image": "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?auto=format&fit=crop&w=300&q=80"},
+        {"id": 22, "category_id": 5, "name": "Pisang Cokelat", "price": 3000, "stock": 20, "active": True, "rec": False, "description": "Piscok lumer renyah", "cat": "Roti & Manis", "image": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=300&q=80"},
+        {"id": 23, "category_id": 5, "name": "Roti Bakar", "price": 7000, "stock": 15, "active": True, "rec": False, "description": "Roti bakar selai cokelat keju", "cat": "Roti & Manis", "image": "https://images.unsplash.com/photo-1584776296944-ab6fb57b0abd?auto=format&fit=crop&w=300&q=80"},
+        {"id": 24, "category_id": 5, "name": "Donat", "price": 3000, "stock": 20, "active": True, "rec": False, "description": "Donat lembut tabur meses", "cat": "Roti & Manis", "image": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80"},
+        {"id": 25, "category_id": 5, "name": "Puding", "price": 4000, "stock": 15, "active": True, "rec": False, "description": "Puding cokelat lembut", "cat": "Roti & Manis", "image": "https://images.unsplash.com/photo-1528975604071-b4dc5281d18c?auto=format&fit=crop&w=300&q=80"}
     ],
     "categories": [
         {"id": 1, "name": "Makanan Berat"},
@@ -123,14 +123,33 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             import random
             code = 'ORD-' + str(random.randint(100, 999))
             
-            total = 0
+            subtotal = 0
             processed_items = []
             for item in data.get('items', []):
                 p = next((prod for prod in db['products'] if prod['id'] == item['id']), None)
                 if p:
                     sub = p['price'] * item['qty']
-                    total += sub
+                    subtotal += sub
                     processed_items.append({"id": p['id'], "name": p['name'], "price": p['price'], "qty": item['qty']})
+
+            # Validasi diskon & voucher di backend sesuai aturan
+            discount = 0
+            voucher_code = data.get('voucher', '').strip().upper()
+
+            if voucher_code == 'SMANSAGEMBIRA':
+                if 50000 <= subtotal <= 99999:
+                    discount = subtotal * 0.10
+            elif voucher_code == 'BESMARTWUS':
+                if subtotal >= 100000:
+                    discount = subtotal * 0.15
+            else:
+                # Diskon otomatis jika tanpa voucher valid tapi memenuhi syarat subtotal
+                if subtotal >= 100000:
+                    discount = subtotal * 0.15
+                elif 50000 <= subtotal <= 99999:
+                    discount = subtotal * 0.10
+
+            total = max(0, subtotal - discount)
 
             new_order = {
                 "code": code,
@@ -138,6 +157,9 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
                 "kelas": data.get('kelas', 'Kelas -'),
                 "status": "Menunggu konfirmasi",
                 "items": processed_items,
+                "subtotal": subtotal,
+                "discount": discount,
+                "voucher": voucher_code if discount > 0 else "",
                 "total": total,
                 "payment": {
                     "method": data.get('payment', 'Tunai'),
@@ -153,7 +175,7 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
-            self.wfile.write(json.dumps({"success": True, "code": code}, ensure_ascii=False).encode('utf-8'))
+            self.wfile.write(json.dumps({"success": True, "code": code, "total": total}, ensure_ascii=False).encode('utf-8'))
             return
 
         elif path == '/api/admin/reset':

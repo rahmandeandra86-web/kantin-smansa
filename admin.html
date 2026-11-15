@@ -62,9 +62,10 @@ async function loadData(){
                 <div>
                   <b>${esc(o.name)}</b> <small>${o.code} · ${o.created.replace('T',' ').slice(0,16)}</small><br>
                   ${o.items.map(i=>`<b>${i.qty}x</b> ${esc(i.name)}`).join(', ')}
+                  ${o.voucher?`<br><small style="color:var(--g)">Voucher: ${o.voucher}</small>`:''}
                 </div>
                 <div style="text-align:right">
-                  <b>${rp(o.total)}</b><br>
+                  <b>${rp(o.total)}</b> ${o.discount>0?`<small style="text-decoration:line-through;color:var(--m)">${rp(o.subtotal)}</small>`:''}<br>
                   <small>Status: <b style="color:var(--g)">${o.status}</b></small><br>
                   <div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
                     <button onclick="updateStatus('${o.code}', 'Dikonfirmasi')">Konfirmasi</button>
