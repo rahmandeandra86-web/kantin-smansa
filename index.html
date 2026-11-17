@@ -106,10 +106,7 @@ const pic=p=>p.image.startsWith('http')||p.image.startsWith('data:')?`<img src="
 const items=()=>Object.entries(cart).map(([id,obj])=>({id:+id,qty:obj.qty,note:obj.note||''}));
 const count=()=>Object.values(cart).reduce((a,b)=>a+b.qty,0);
 function save(){localStorage.ks_cart=JSON.stringify(cart);$('#cc').textContent=count()||'';$('#cc').style.display=count()?'':'none'}
-
-// 1. Pukul berapa sampai berapa dihapus, hanya tampil tulisan PRE-ORDER saja
 function poBar(){const p=M.po;return `<div class="po ${p.status}" id="po"><span>PRE-ORDER</span></div>`}
-
 function card(p){const off=!p.active||p.stock<1||M.po.status=='closed';return `<div class="card"><div class="pic">${pic(p)}</div><div class="info"><b>${esc(p.name)}</b><small>${esc(p.description)}</small><small>${esc(p.cat)} · Sisa ${p.stock} porsi</small><span class="price">${rp(p.price)}</span><button class="add" ${off?'disabled':''} onclick="add(${p.id})">${!p.active||p.stock<1?'Habis':M.po.status=='closed'?'PO ditutup':'+ Keranjang'}</button></div></div>`}
 
 function add(id){
@@ -188,7 +185,6 @@ function go(v){
    quote();
    const ps=Object.fromEntries(M.products.map(p=>[p.id,p]));
    
-   // 3. Kelompokkan keranjang berdasarkan kategori makanan
    const grouped = {};
    Object.entries(cart).forEach(([id, obj]) => {
      const p = ps[id];
@@ -217,7 +213,6 @@ function go(v){
      </div>`;
    }
 
-   // 2 & 4. Tambahan No Rekening BRI dan label Coming Soon untuk QRIS
    a.innerHTML=poBar()+'<h2>Keranjang Belanja</h2>'+cartHtml+
    `<div class="box"><b>Identitas siswa</b><input id="nm" placeholder="Nama lengkap" value="${esc(S.name)}" oninput="S.name=this.value"><select id="kl" onchange="S.kelas=this.value"><option value="">Pilih kelas</option>${KELAS.map(k=>`<option ${S.kelas==k?'selected':''}>${k}</option>`).join('')}</select></div>
    <div class="box"><b>Voucher</b><div style="display:flex;gap:8px"><input id="vc" placeholder="Kode voucher (cth: SMANSAGEMBIRA)" value="${esc(S.code)}" oninput="S.code=this.value.toUpperCase();localStorage.ks_code=S.code;"><button class="add" style="padding:0 16px;height:44px;margin-top:4px" onclick="quote()">Terapkan</button></div></div>
@@ -282,17 +277,16 @@ async function order(){
   }
 }
 
-// 4. Memperbaiki fungsi pembatalan pesanan agar terkirim ke server
 async function cancelOrder(code){
   const reason = prompt('Masukkan alasan pembatalan pesanan:');
   if(reason === null) return; 
   if(!reason.trim()){alert('Alasan pembatalan wajib diisi.');return;}
 
   try {
-    const res = await fetch('/api/orders/' + code + '/cancel', {
+    const res = await fetch('/api/cancel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason: reason.trim() })
+      body: JSON.stringify({ code: code, reason: reason.trim() })
     });
     const result = await res.json();
     if(result.success){
