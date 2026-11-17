@@ -46,7 +46,7 @@ DEFAULT_DB = {
         {"id": 4, "name": "Minuman"},
         {"id": 5, "name": "Roti & Manis"}
     ],
-    "po": {"status": "open", "label": "PRE-ORDER READY", "open_time": "07:00", "close_time": "12:00", "mode": "open"},
+    "po": {"status": "open", "label": "PRE-ORDER", "open_time": "07:00", "close_time": "12:00", "mode": "open"},
     "orders": [],
     "vouchers": []
 }
@@ -184,7 +184,6 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         elif '/cancel' in path:
-            # Endpoint pembatalan pesanan oleh siswa (/api/orders/ORD-XXX/cancel)
             parts = path.split('/')
             if len(parts) >= 4:
                 order_code = parts[2]
