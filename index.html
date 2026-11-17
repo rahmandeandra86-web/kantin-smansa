@@ -21,10 +21,10 @@ h2{font-size:17px;margin:16px 0 8px}.grid{display:grid;grid-template-columns:rep
 .info{padding:10px;flex:1;display:flex;flex-direction:column;gap:3px}.info small{color:var(--m)}.price{font-weight:800;color:var(--g)}
 button.add{margin-top:auto;border:0;background:var(--g);color:#fff;padding:9px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
 .row{display:flex;align-items:center;gap:10px;background:var(--w);padding:10px;border-radius:14px;margin-bottom:8px}.row .grow{flex:1}.qty{display:flex;align-items:center;gap:8px}.qty button{width:30px;height:30px;border-radius:50%;border:0;background:var(--bg);color:var(--t);font-size:18px;cursor:pointer}
-.box{background:var(--w);padding:14px;border-radius:16px;margin:10px 0}.box input,.box select{width:100%;padding:11px;margin:4px 0 10px;border:1px solid #8884;border-radius:10px;font:inherit;background:var(--bg);color:var(--t)}
+.box{background:var(--w);padding:14px;border-radius:16px;margin:10px 0}.box input,.box select,.box textarea{width:100%;padding:11px;margin:4px 0 10px;border:1px solid #8884;border-radius:10px;font:inherit;background:var(--bg);color:var(--t)}
 .sum div{display:flex;justify-content:space-between;padding:3px 0}.tot{font-weight:800;font-size:17px;border-top:1px dashed #8886;margin-top:6px;padding-top:8px}
 .err{color:var(--r);font-size:13px}.ok{color:var(--g);font-size:13px}.big{width:100%;padding:14px;border:0;border-radius:14px;background:var(--g);color:#fff;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
-.pay label{display:flex;gap:8px;align-items:center;padding:6px 0}.pay input{width:auto;margin:0}.badge{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--y);color:#3a2d00;font-size:12px;font-weight:700}
+.pay label{display:flex;gap:8px;align-items:center;padding:6px 0}.pay input{width:auto;margin:0}
 nav{position:fixed;bottom:0;left:0;right:0;background:var(--w);display:flex;justify-content:space-around;padding:10px 0;box-shadow:0 -2px 12px #0002;z-index:99}
 nav button{background:none;border:0;font:inherit;color:var(--m);display:flex;flex-direction:column;align-items:center;font-size:12px;cursor:pointer;position:relative}nav button.on{color:var(--g);font-weight:700}nav span{font-size:22px}nav i{position:absolute;top:-4px;right:-2px;background:var(--r);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;font-style:normal}
 .empty{text-align:center;color:var(--m);padding:40px 10px}.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:99px;animation:f .25s}@keyframes f{from{opacity:0;transform:translate(-50%,10px)}}
@@ -86,26 +86,63 @@ let M={
     {id:5,name:'Roti & Manis'}
   ],
   products:JSON.parse(localStorage.ks_products||JSON.stringify(DEFAULT_PRODUCTS)),
-  po:JSON.parse(localStorage.ks_po||JSON.stringify({status:'open',label:'Pre-Order Dibuka',open_time:'07:00',close_time:'12:00'}))
+  po:JSON.parse(localStorage.ks_po||JSON.stringify({status:'open',label:'PRE-ORDER READY',open_time:'07:00',close_time:'12:00'}))
 };
 
-let cart=JSON.parse(localStorage.ks_cart||'{}'),cat=0,q='',view='home',S={name:localStorage.ks_name||'',kelas:localStorage.ks_kelas||'',code:localStorage.ks_code||'',pay:'Tunai',note:''},Q=null;
+// Struktur cart: { id: { qty: number, note: string } } atau migrasi dari format lama
+let rawCart = JSON.parse(localStorage.ks_cart||'{}');
+let cart = {};
+Object.entries(rawCart).forEach(([k,v]) => {
+  if (typeof v === 'number') {
+    cart[k] = { qty: v, note: '' };
+  } else {
+    cart[k] = v;
+  }
+});
+
+let cat=0,q='',view='home',S={name:localStorage.ks_name||'',kelas:localStorage.ks_kelas||'',code:localStorage.ks_code||'',pay:'Tunai',note:''},Q=null;
 
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2200)}
 const pic=p=>p.image.startsWith('http')||p.image.startsWith('data:')?`<img src="${p.image}" alt="">`:p.image;
-const items=()=>Object.entries(cart).map(([id,qty])=>({id:+id,qty}));
-const count=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+const items=()=>Object.entries(cart).map(([id,obj])=>({id:+id,qty:obj.qty,note:obj.note||''}));
+const count=()=>Object.values(cart).reduce((a,b)=>a+b.qty,0);
 function save(){localStorage.ks_cart=JSON.stringify(cart);$('#cc').textContent=count()||'';$('#cc').style.display=count()?'':'none'}
-function poBar(){const p=M.po;return `<div class="po ${p.status}" id="po"><span>${p.label}</span><span>Buka ${p.open_time}–${p.close_time}</span></div>`}
+function poBar(){const p=M.po;return `<div class="po ${p.status}" id="po"><span>PRE-ORDER READY</span><span>Buka ${p.open_time}–${p.close_time}</span></div>`}
 function card(p){const off=!p.active||p.stock<1||M.po.status=='closed';return `<div class="card"><div class="pic">${pic(p)}</div><div class="info"><b>${esc(p.name)}</b><small>${esc(p.description)}</small><small>${esc(p.cat)} · Sisa ${p.stock} porsi</small><span class="price">${rp(p.price)}</span><button class="add" ${off?'disabled':''} onclick="add(${p.id})">${!p.active||p.stock<1?'Habis':M.po.status=='closed'?'PO ditutup':'+ Keranjang'}</button></div></div>`}
 
-function add(id){const p=M.products.find(x=>x.id==id);if(p&&(cart[id]||0)>=p.stock)return toast('Stok tinggal '+p.stock+' porsi');cart[id]=(cart[id]||0)+1;save();toast('Masuk keranjang')}
-function chg(id,d){const p=M.products.find(x=>x.id==id);if(d>0&&p&&cart[id]>=p.stock)return toast('Stok tinggal '+p.stock+' porsi');cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];save();quote()}
+function add(id){
+  const p=M.products.find(x=>x.id==id);
+  let curQty = cart[id] ? cart[id].qty : 0;
+  if(p&&curQty>=p.stock)return toast('Stok tinggal '+p.stock+' porsi');
+  if(!cart[id]) cart[id]={qty:0, note:''};
+  cart[id].qty += 1;
+  save();
+  toast('Masuk keranjang');
+}
+
+function chg(id,d){
+  const p=M.products.find(x=>x.id==id);
+  let curQty = cart[id] ? cart[id].qty : 0;
+  if(d>0&&p&&curQty>=p.stock)return toast('Stok tinggal '+p.stock+' porsi');
+  if(!cart[id]) cart[id]={qty:0, note:''};
+  cart[id].qty += d;
+  if(cart[id].qty<=0) delete cart[id];
+  save();
+  quote();
+}
+
+function updateItemNote(id, val){
+  if(cart[id]){
+    cart[id].note = val;
+    save();
+  }
+}
+
 function del(id){delete cart[id];save();quote()}
 
 async function quote(){
   if(!count()){Q=null;return go('cart')}
-  let subtotal=Object.entries(cart).reduce((a,[id,n])=>a+(M.products.find(p=>p.id==+id)?.price||0)*n,0);
+  let subtotal=Object.entries(cart).reduce((a,[id,obj])=>a+(M.products.find(p=>p.id==+id)?.price||0)*obj.qty,0);
   let discount=0;
   let error='';
   let code=S.code.trim().toUpperCase();
@@ -125,7 +162,6 @@ async function quote(){
   } else if(code!==''){
     error='Kode voucher tidak valid';
   } else {
-    // Diskon otomatis jika tanpa kode voucher tapi memenuhi syarat
     if(subtotal>=100000){
       discount=subtotal*0.15;
     } else if(subtotal>=50000 && subtotal<=99999){
@@ -145,10 +181,41 @@ function go(v){
   const a=$('#app');
   if(v=='home'){const t=q.toLowerCase(),f=M.products.filter(p=>(!cat||p.category_id==cat)&&(p.name+p.description).toLowerCase().includes(t));
    a.innerHTML=poBar()+(q||cat?'':bnr())+`<div class="chips"><button class="chip ${!cat?'on':''}" onclick="cat=0;go('home')">Semua</button>${M.categories.map(c=>`<button class="chip ${cat==c.id?'on':''}" onclick="cat=${c.id};go('home')">${esc(c.name)}</button>`).join('')}</div>`+`<h2>${q||cat?'Hasil':'Menu Favorit Hari Ini'}</h2>`+(f.length?`<div class="grid">${f.map(card).join('')}</div>`:'<div class="empty">Menu tidak ditemukan.</div>')}
+  
   if(v=='cart'){if(!count()){a.innerHTML='<div class="empty">Keranjang kosong.<br>Pilih menu dulu di Beranda.</div>';return}
    quote();
    const ps=Object.fromEntries(M.products.map(p=>[p.id,p]));
-   a.innerHTML=poBar()+'<h2>Keranjang</h2>'+Object.entries(cart).map(([id,n])=>{const p=ps[id];return p?`<div class="row"><div class="pic" style="width:56px;height:56px;border-radius:10px;font-size:28px">${pic(p)}</div><div class="grow"><b>${esc(p.name)}</b><br><span class="price">${rp(p.price*n)}</span></div><div class="qty"><button onclick="chg(${id},-1)">−</button><b>${n}</b><button onclick="chg(${id},1)">+</button></div><button class="qty" style="border:0;background:none;cursor:pointer" onclick="del(${id})" aria-label="Hapus">🗑️</button></div>`:''}).join('')+
+   
+   // Mengelompokkan item keranjang berdasarkan kategori makanan (cat)
+   const grouped = {};
+   Object.entries(cart).forEach(([id, obj]) => {
+     const p = ps[id];
+     if(p){
+       const cName = p.cat || 'Lainnya';
+       if(!grouped[cName]) grouped[cName] = [];
+       grouped[cName].push({id, obj, p});
+     }
+   });
+
+   let cartHtml = '';
+   for(const [catName, itemsArr] of Object.entries(grouped)){
+     cartHtml += `<div class="box" style="margin-bottom:12px;background:var(--w);padding:12px;border-radius:14px;">
+       <h3 style="margin:0 0 8px;font-size:15px;color:var(--g);border-bottom:1px solid #8883;padding-bottom:6px;">📦 Kategori: ${esc(catName)}</h3>
+       ${itemsArr.map(({id, obj, p})=>`
+         <div class="row" style="background:var(--bg);border-radius:10px;padding:8px;margin-bottom:8px;">
+           <div class="pic" style="width:48px;height:48px;border-radius:8px;font-size:24px">${pic(p)}</div>
+           <div class="grow"><b>${esc(p.name)}</b><br><span class="price">${rp(p.price*obj.qty)}</span></div>
+           <div class="qty"><button onclick="chg(${id},-1)">−</button><b>${obj.qty}</b><button onclick="chg(${id},1)">+</button></div>
+           <button class="qty" style="border:0;background:none;cursor:pointer" onclick="del(${id})" aria-label="Hapus">🗑️</button>
+         </div>
+         <div style="margin-bottom:8px;">
+           <input placeholder="Catatan khusus menu ini (cth: Jangan pakai pedas)..." value="${esc(obj.note||'')}" oninput="updateItemNote(${id}, this.value)" style="margin:0;padding:8px;font-size:13px;">
+         </div>
+       `).join('')}
+     </div>`;
+   }
+
+   a.innerHTML=poBar()+'<h2>Keranjang Belanja</h2>'+cartHtml+
    `<div class="box"><b>Identitas siswa</b><input id="nm" placeholder="Nama lengkap" value="${esc(S.name)}" oninput="S.name=this.value"><select id="kl" onchange="S.kelas=this.value"><option value="">Pilih kelas</option>${KELAS.map(k=>`<option ${S.kelas==k?'selected':''}>${k}</option>`).join('')}</select></div>
    <div class="box"><b>Voucher</b><div style="display:flex;gap:8px"><input id="vc" placeholder="Kode voucher (cth: SMANSAGEMBIRA)" value="${esc(S.code)}" oninput="S.code=this.value.toUpperCase();localStorage.ks_code=S.code;"><button class="add" style="padding:0 16px;height:44px;margin-top:4px" onclick="quote()">Terapkan</button></div></div>
    <div class="box pay"><b>Pembayaran</b>${['Tunai','Transfer bank','QRIS'].map(m=>`<label><input type="radio" name="pm" ${S.pay==m?'checked':''} onchange="S.pay='${m}';go('cart')">${m}${m=='Tunai'?' (bayar saat ambil)':''}</label>`).join('')}</div>
@@ -198,6 +265,29 @@ async function order(){
   }
 }
 
+async function cancelOrder(code){
+  const reason = prompt('Masukkan alasan pembatalan pesanan:');
+  if(reason === null) return; // Dibatalkan prompt
+  if(!reason.trim()){alert('Alasan pembatalan wajib diisi.');return;}
+
+  try {
+    const res = await fetch('/api/orders/' + code + '/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: reason.trim() })
+    });
+    const result = await res.json();
+    if(result.success){
+      toast('Pesanan berhasil dibatalkan');
+      loadOrders();
+    } else {
+      alert(result.error || 'Gagal membatalkan pesanan');
+    }
+  } catch(e) {
+    alert('Terjadi kesalahan koneksi.');
+  }
+}
+
 async function loadOrders(){
   const myCodes = JSON.parse(localStorage.ks_my_codes || '[]');
   if(!myCodes.length){$('#app').innerHTML='<div class="empty">Belum ada pesanan.</div>';return}
@@ -209,12 +299,14 @@ async function loadOrders(){
     
     $('#app').innerHTML='<h2>Riwayat pesanan</h2>'+orders.map(o=>`
       <div class="box sum">
-        <div><b>${o.code}</b><span class="badge" style="background:${o.status=='Dikonfirmasi'?'#d9f5e5':'#ffc83d'};color:#000">${o.status}</span></div>
+        <div><b>${o.code}</b><span class="badge" style="background:${o.status=='Dikonfirmasi'?'#d9f5e5':o.status=='Dibatalkan'?'#fbdcdc':'#ffc83d'};color:#000">${o.status}</span></div>
         <small style="color:var(--m)">${o.created.replace('T',' ').slice(0,16)} · ${esc(o.name)} (${o.kelas})</small>
-        ${o.items.map(i=>`<div><span>${i.qty}× ${esc(i.name)}</span><span>${rp(i.price*i.qty)}</span></div>`).join('')}
+        ${o.items.map(i=>`<div><span>${i.qty}× ${esc(i.name)} ${i.note?`<i>(${esc(i.note)})</i>`:''}</span><span>${rp(i.price*i.qty)}</span></div>`).join('')}
         ${o.discount>0?`<div><span>Diskon Voucher</span><span style="color:var(--g)">-${rp(o.discount)}</span></div>`:''}
         <div class="tot"><span>Total · ${o.payment.method}</span><span>${rp(o.total)}</span></div>
         <small style="color:var(--m)">Status Pembayaran: ${o.payment.status}</small>
+        ${o.cancel_reason?`<div style="margin-top:6px;color:var(--r);font-size:13px;"><b>Alasan Dibatalkan:</b> ${esc(o.cancel_reason)}</div>`:''}
+        ${o.status=='Menunggu konfirmasi'?`<div style="margin-top:10px;"><button class="r" style="width:100%;padding:8px;" onclick="cancelOrder('${o.code}')">Batalkan Pesanan</button></div>`:''}
       </div>`).join('');
   } catch(e) {
     $('#app').innerHTML='<div class="empty">Gagal memuat pesanan dari server.</div>';

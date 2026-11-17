@@ -3,6 +3,7 @@ import socketserver
 import json
 import os
 import urllib.parse
+import datetime
 
 # Memastikan direktori kerja server selalu sinkron dengan lokasi script
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -10,7 +11,6 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 PORT = int(os.environ.get('PORT', 8080))
 DB_FILE = 'database.json'
 
-# Data Default dengan produk yang sudah memiliki foto relevan
 DEFAULT_DB = {
     "products": [
         {"id": 1, "category_id": 1, "name": "Nasi Goreng Telur", "price": 12000, "stock": 15, "active": True, "rec": True, "description": "Nasi goreng gurih dengan telur", "cat": "Makanan Berat", "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=300&q=80"},
@@ -46,7 +46,7 @@ DEFAULT_DB = {
         {"id": 4, "name": "Minuman"},
         {"id": 5, "name": "Roti & Manis"}
     ],
-    "po": {"status": "open", "label": "Pre-Order Dibuka", "open_time": "07:00", "close_time": "12:00", "mode": "open"},
+    "po": {"status": "open", "label": "PRE-ORDER READY", "open_time": "07:00", "close_time": "12:00", "mode": "open"},
     "orders": [],
     "vouchers": []
 }
@@ -130,9 +130,14 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
                 if p:
                     sub = p['price'] * item['qty']
                     subtotal += sub
-                    processed_items.append({"id": p['id'], "name": p['name'], "price": p['price'], "qty": item['qty']})
+                    processed_items.append({
+                        "id": p['id'], 
+                        "name": p['name'], 
+                        "price": p['price'], 
+                        "qty": item['qty'],
+                        "note": item.get('note', '')
+                    })
 
-            # Validasi diskon & voucher di backend sesuai aturan
             discount = 0
             voucher_code = data.get('voucher', '').strip().upper()
 
@@ -143,7 +148,6 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
                 if subtotal >= 100000:
                     discount = subtotal * 0.15
             else:
-                # Diskon otomatis jika tanpa voucher valid tapi memenuhi syarat subtotal
                 if subtotal >= 100000:
                     discount = subtotal * 0.15
                 elif 50000 <= subtotal <= 99999:
@@ -166,7 +170,8 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
                     "status": "Belum bayar" if data.get('payment') == 'Tunai' else "Menunggu verifikasi",
                     "note": data.get('note', '')
                 },
-                "created": __import__('datetime').datetime.now().isoformat()
+                "cancel_reason": "",
+                "created": datetime.datetime.now().isoformat()
             }
             
             db['orders'].insert(0, new_order)
@@ -177,6 +182,27 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({"success": True, "code": code, "total": total}, ensure_ascii=False).encode('utf-8'))
             return
+
+        elif '/cancel' in path:
+            # Endpoint pembatalan pesanan oleh siswa (/api/orders/ORD-XXX/cancel)
+            parts = path.split('/')
+            if len(parts) >= 4:
+                order_code = parts[2]
+                reason = data.get('reason', 'Tanpa alasan')
+                found = False
+                for o in db['orders']:
+                    if str(o.get('code')) == str(order_code):
+                        if o['status'] == 'Menunggu konfirmasi':
+                            o['status'] = 'Dibatalkan'
+                            o['cancel_reason'] = reason
+                            found = True
+                        break
+                save_db(db)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": found}, ensure_ascii=False).encode('utf-8'))
+                return
 
         elif path == '/api/admin/reset':
             db['orders'] = []
