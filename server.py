@@ -183,25 +183,23 @@ class SimpleHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True, "code": code, "total": total}, ensure_ascii=False).encode('utf-8'))
             return
 
-        elif '/cancel' in path:
-            parts = path.split('/')
-            if len(parts) >= 4:
-                order_code = parts[2]
-                reason = data.get('reason', 'Tanpa alasan')
-                found = False
-                for o in db['orders']:
-                    if str(o.get('code')) == str(order_code):
-                        if o['status'] == 'Menunggu konfirmasi':
-                            o['status'] = 'Dibatalkan'
-                            o['cancel_reason'] = reason
-                            found = True
-                        break
-                save_db(db)
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": found}, ensure_ascii=False).encode('utf-8'))
-                return
+        elif path == '/api/cancel':
+            order_code = data.get('code')
+            reason = data.get('reason', 'Tanpa alasan')
+            found = False
+            for o in db['orders']:
+                if str(o.get('code')) == str(order_code):
+                    if o['status'] == 'Menunggu konfirmasi':
+                        o['status'] = 'Dibatalkan'
+                        o['cancel_reason'] = reason
+                        found = True
+                    break
+            save_db(db)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps({"success": found}, ensure_ascii=False).encode('utf-8'))
+            return
 
         elif path == '/api/admin/reset':
             db['orders'] = []
